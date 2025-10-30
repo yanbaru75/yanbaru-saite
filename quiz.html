@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>やんばるクイズ</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background: #f3f5f7;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0f72cc;
+      color: #fff;
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+    .container {
+      max-width: 720px;
+      margin: 1.5rem auto;
+      background: #fff;
+      border-radius: .8rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 26px rgba(0,0,0,.05);
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .question {
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .choices {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.3rem;
+      display: grid;
+      gap: .6rem;
+    }
+    .choices li button {
+      width: 100%;
+      border: 1px solid #d7dfe4;
+      background: #fff;
+      border-radius: .5rem;
+      padding: .6rem .8rem;
+      text-align: left;
+      cursor: pointer;
+      transition: .12s;
+    }
+    .choices li button:hover {
+      background: #edf3ff;
+    }
+    .status {
+      margin-top: .5rem;
+      color: #666;
+    }
+    .result {
+      font-weight: 700;
+      margin-top: 1rem;
+    }
+    .btn-next {
+      display: inline-block;
+      background: #0f72cc;
+      color: #fff;
+      border: none;
+      border-radius: .5rem;
+      padding: .5rem .9rem;
+      cursor: pointer;
+      font-size: .9rem;
+    }
+    .hidden { display: none; }
+    footer {
+      text-align: center;
+      margin: 1.5rem 0;
+      color: #aaa;
+      font-size: .75rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>やんばるクイズ</h1>
+  <p>このサイトに書いてある自己紹介をちゃんと読んだ？😎</p>
+</header>
+
+<main class="container">
+  <div id="quiz-box">
+    <p class="question" id="question-text"></p>
+    <ul class="choices" id="choices-list"></ul>
+    <p class="status" id="status-text"></p>
+    <p class="result" id="result-text"></p>
+    <button class="btn-next hidden" id="next-btn">つぎの問題へ →</button>
+    <button class="btn-next hidden" id="restart-btn">もう一回やる</button>
+  </div>
+</main>
+
+<footer>© 2025 やんばる</footer>
+
+<script>
+  const quizData = [
+    {
+      q: "このサイトのハンドルネームは何でしたか？",
+      choices: ["やんばる", "やんばる課長", "やんばる大王", "Yanbaru-san"],
+      answer: 0
+    },
+    {
+      q: "やんばるさんがサイトで話すと書いていた主なテーマはどれ？",
+      choices: [
+        "印刷・冊子づくり・DX・BNIのこと",
+        "釣りと株と不動産投資",
+        "アニメとゲームレビュー",
+        "海外旅行と英語学習"
+      ],
+      answer: 0
+    },
+    {
+      q: "連絡方法として書かれていたのはどれ？",
+      choices: [
+        "SNSのDMまたはメールで、と書いてあった",
+        "電話だけ、と書いてあった",
+        "FAXのみ、と書いてあった",
+        "フォームからのみ、と書いてあった"
+      ],
+      answer: 0
+    },
+    {
+      q: "サイトの用途として近いのはどれ？",
+      choices: [
+        "名刺代わりの公開プロフィール",
+        "オンラインショップ",
+        "求人募集サイト",
+        "動画ストリーミングサイト"
+      ],
+      answer: 0
+    }
+  ];
+
+  let current = 0;
+  let score = 0;
+
+  const qText = document.getElementById("question-text");
+  const choicesList = document.getElementById("choices-list");
+  const statusText = document.getElementById("status-text");
+  const resultText = document.getElementById("result-text");
+  const nextBtn = document.getElementById("next-btn");
+  const restartBtn = document.getElementById("restart-btn");
+
+  function showQuestion() {
+    const item = quizData[current];
+    qText.textContent = item.q;
+    choicesList.innerHTML = "";
+    resultText.textContent = "";
+    nextBtn.classList.add("hidden");
+
+    item.choices.forEach((choice, index) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.textContent = choice;
+      btn.onclick = () => checkAnswer(index);
+      li.appendChild(btn);
+      choicesList.appendChild(li);
+    });
+
+    statusText.textContent = `問題 ${current + 1} / ${quizData.length}`;
+  }
+
+  function checkAnswer(selected) {
+    const item = quizData[current];
+    if (selected === item.answer) {
+      resultText.textContent = "⭕ 正解！";
+      resultText.style.color = "#118c2f";
+      score++;
+    } else {
+      resultText.textContent = "❌ ざんねん…";
+      resultText.style.color = "#d63f3f";
+    }
+    Array.from(choicesList.querySelectorAll("button")).forEach(btn => {
+      btn.disabled = true;
+    });
+
+    if (current < quizData.length - 1) {
+      nextBtn.classList.remove("hidden");
+    } else {
+      resultText.textContent += `　スコア：${score} / ${quizData.length}`;
+      restartBtn.classList.remove("hidden");
+    }
+  }
+
+  nextBtn.onclick = () => {
+    current++;
+    showQuestion();
+  };
+
+  restartBtn.onclick = () => {
+    current = 0;
+    score = 0;
+    restartBtn.classList.add("hidden");
+    showQuestion();
+  };
+
+  showQuestion();
+</script>
+
+</body>
+</html>
